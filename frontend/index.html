@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoMo SMS Analytics</title>
+    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css">
+</head>
+<body>
+    <div id="app">
+        <header class="header">
+            <div class="container">
+                <div class="logo">
+                    <h1>MoMo SMS Analytics</h1>
+                </div>
+                <nav class="nav">
+                    <ul>
+                        <li><a href="#" class="active" id="dashboard-link">Dashboard</a></li>
+                        <li><a href="#" id="transactions-link">Transactions</a></li>
+                        <li><a href="#" id="upload-link">Upload</a></li>
+                        <li><a href="#" id="settings-link">Settings</a></li>
+                    </ul>
+                </nav>
+                <div class="user-menu">
+                    <div class="user-info">
+                        <span id="user-name">Guest</span>
+                    </div>
+                    <button id="login-btn" class="btn btn-primary">Login</button>
+                    <button id="logout-btn" class="btn btn-outline" style="display: none;">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="container">
+                <!-- Dashboard View -->
+                <div id="dashboard-view" class="view">
+                    <div class="dashboard-header">
+                        <h2>Dashboard</h2>
+                        <div class="dashboard-actions">
+                            <div class="date-filter">
+                                <label for="date-from">From:</label>
+                                <input type="date" id="date-from">
+                                <label for="date-to">To:</label>
+                                <input type="date" id="date-to">
+                                <button id="apply-date-filter" class="btn btn-sm">Apply</button>
+                            </div>
+                            <button id="export-btn" class="btn btn-outline">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="summary-cards">
+                        <div class="card summary-card">
+                            <div class="card-content">
+                                <h3>Total Transactions</h3>
+                                <div class="summary-value" id="total-transactions">0</div>
+                                <div class="summary-description">All transactions</div>
+                                <div class="summary-trend positive">+12.5%</div>
+                            </div>
+                        </div>
+                        <div class="card summary-card">
+                            <div class="card-content">
+                                <h3>Total Volume</h3>
+                                <div class="summary-value" id="total-volume">0 RWF</div>
+                                <div class="summary-description">Transaction amount</div>
+                                <div class="summary-trend positive">+8.2%</div>
+                            </div>
+                        </div>
+                        <div class="card summary-card">
+                            <div class="card-content">
+                                <h3>Average Amount</h3>
+                                <div class="summary-value" id="avg-amount">0 RWF</div>
+                                <div class="summary-description">Per transaction</div>
+                                <div class="summary-trend negative">-3.1%</div>
+                            </div>
+                        </div>
+                        <div class="card summary-card">
+                            <div class="card-content">
+                                <h3>Total Fees</h3>
+                                <div class="summary-value" id="total-fees">0 RWF</div>
+                                <div class="summary-description">Service charges</div>
+                                <div class="summary-trend positive">+5.4%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-tabs">
+                        <div class="tabs">
+                            <button class="tab-btn active" data-tab="overview">Overview</button>
+                            <button class="tab-btn" data-tab="analytics">Analytics</button>
+                            <button class="tab-btn" data-tab="reports">Reports</button>
+                        </div>
+
+                        <div class="tab-content active" id="overview-tab">
+                            <div class="charts-container">
+                                <div class="card chart-card large">
+                                    <div class="card-header">
+                                        <h3>Transaction Volume</h3>
+                                        <p>Daily transaction volume over time</p>
+                                    </div>
+                                    <div class="card-content">
+                                        <canvas id="transaction-chart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="card chart-card medium">
+                                    <div class="card-header">
+                                        <h3>Transaction Types</h3>
+                                        <p>Distribution by transaction category</p>
+                                    </div>
+                                    <div class="card-content">
+                                        <canvas id="distribution-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Recent Transactions</h3>
+                                    <p>Latest processed transactions</p>
+                                </div>
+                                <div class="card-content">
+                                    <div class="table-container">
+                                        <table id="recent-transactions-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Type</th>
+                                                    <th>Amount</th>
+                                                    <th>Sender/Recipient</th>
+                                                    <th>Date</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Transactions will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="analytics-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Advanced Analytics</h3>
+                                    <p>Detailed analysis of transaction patterns</p>
+                                </div>
+                                <div class="card-content">
+                                    <div class="placeholder">
+                                        <p>Advanced analytics content will be displayed here</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="reports-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Generated Reports</h3>
+                                    <p>Download and view saved reports</p>
+                                </div>
+                                <div class="card-content">
+                                    <div class="placeholder">
+                                        <p>Reports will be displayed here</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transactions View -->
+                <div id="transactions-view" class="view" style="display: none;">
+                    <div class="view-header">
+                        <h2>Transactions</h2>
+                        <div class="view-actions">
+                            <div class="search-container">
+                                <input type="text" id="transaction-search" placeholder="Search transactions...">
+                                <button id="search-btn" class="btn btn-sm">Search</button>
+                            </div>
+                            <div class="filter-container">
+                                <select id="transaction-type-filter">
+                                    <option value="">All Types</option>
+                                    <option value="incoming_money">Incoming Money</option>
+                                    <option value="outgoing_payment">Outgoing Payment</option>
+                                    <option value="airtime_payment">Airtime Payment</option>
+                                    <option value="cash_power">Cash Power</option>
+                                    <option value="withdrawal">Withdrawal</option>
+                                    <option value="bank_transfer">Bank Transfer</option>
+                                    <option value="internet_bundle">Internet Bundle</option>
+                                    <option value="third_party">Third Party</option>
+                                    <option value="bank_deposit">Bank Deposit</option>
+                                </select>
+                                <input type="date" id="transaction-date-filter">
+                                <button id="filter-btn" class="btn btn-sm">Filter</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="table-container">
+                                <table id="transactions-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Type</th>
+                                            <th>Category</th>
+                                            <th>Amount</th>
+                                            <th>Fee</th>
+                                            <th>Sender</th>
+                                            <th>Recipient</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Transactions will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="pagination">
+                                <button id="prev-page" class="btn btn-sm" disabled>Previous</button>
+                                <span id="page-info">Page 1 of 1</span>
+                                <button id="next-page" class="btn btn-sm" disabled>Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload View -->
+                <div id="upload-view" class="view" style="display: none;">
+                    <div class="view-header">
+                        <h2>Upload SMS Data</h2>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Upload XML File</h3>
+                            <p>Upload an XML file containing SMS messages to process</p>
+                        </div>
+                        <div class="card-content">
+                            <form id="upload-form">
+                                <div class="form-group">
+                                    <label for="file-upload">Select XML File</label>
+                                    <input type="file" id="file-upload" accept=".xml">
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">Upload & Process</button>
+                                </div>
+                            </form>
+                            <div id="upload-progress" style="display: none;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill"></div>
+                                </div>
+                                <p id="progress-status">Processing...</p>
+                            </div>
+                            <div id="upload-result" style="display: none;">
+                                <h4>Processing Results</h4>
+                                <div id="result-content"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Upload History</h3>
+                            <p>Previous file uploads and processing results</p>
+                        </div>
+                        <div class="card-content">
+                            <div class="table-container">
+                                <table id="upload-history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>File Name</th>
+                                            <th>Transactions</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Upload history will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings View -->
+                <div id="settings-view" class="view" style="display: none;">
+                    <div class="view-header">
+                        <h2>Settings</h2>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>User Settings</h3>
+                        </div>
+                        <div class="card-content">
+                            <form id="user-settings-form">
+                                <div class="form-group">
+                                    <label for="user-name-input">Full Name</label>
+                                    <input type="text" id="user-name-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-email-input">Email</label>
+                                    <input type="email" id="user-email-input">
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Application Settings</h3>
+                        </div>
+                        <div class="card-content">
+                            <form id="app-settings-form">
+                                <div class="form-group">
+                                    <label for="currency-select">Currency</label>
+                                    <select id="currency-select">
+                                        <option value="RWF">Rwandan Franc (RWF)</option>
+                                        <option value="USD">US Dollar (USD)</option>
+                                        <option value="EUR">Euro (EUR)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="date-format-select">Date Format</label>
+                                    <select id="date-format-select">
+                                        <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                                        <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="theme-select">Theme</label>
+                                    <select id="theme-select">
+                                        <option value="light">Light</option>
+                                        <option value="dark">Dark</option>
+                                        <option value="system">System</option>
+                                    </select>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modal Components -->
+        <div id="login-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Login</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </div>
+                    </form>
+                    <p class="modal-footer-text">
+                        Don't have an account? <a href="#" id="register-link">Register</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div id="register-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Register</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="register-form">
+                        <div class="form-group">
+                            <label for="register-name">Full Name</label>
+                            <input type="text" id="register-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-email">Email</label>
+                            <input type="email" id="register-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Password</label>
+                            <input type="password" id="register-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-confirm-password">Confirm Password</label>
+                            <input type="password" id="register-confirm-password" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </div>
+                    </form>
+                    <p class="modal-footer-text">
+                        Already have an account? <a href="#" id="login-link">Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div id="transaction-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Transaction Details</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="transaction-details">
+                        <!-- Transaction details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="src/js/api.js"></script>
+    <script src="src/js/auth.js"></script>
+    <script src="src/js/dashboard.js"></script>
+    <script src="src/js/transactions.js"></script>
+    <script src="src/js/upload.js"></script>
+    <script src="src/js/app.js"></script>
+</body>
+</html>
